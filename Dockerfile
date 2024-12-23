@@ -1,4 +1,4 @@
-#  Copyright (C) 2018-2021 LEIDOS.
+#  Copyright (C) 2018-2024 LEIDOS.
 # 
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may not
 #  use this file except in compliance with the License. You may obtain a copy of
@@ -15,7 +15,7 @@ ARG DOCKER_ORG="usdotfhwastoldev"
 ARG DOCKER_TAG="develop-humble"
 FROM ${DOCKER_ORG}/carma-base:${DOCKER_TAG} as base_image
 FROM base_image as setup
-ARG GIT_BRANCH="develop" 
+ARG GIT_BRANCH="develop-humble" 
 
 RUN mkdir ~/src
 COPY --chown=carma . /home/carma/src/
@@ -43,5 +43,4 @@ COPY --from=setup /opt/carma/install /opt/carma/install
 
 RUN pip install future
 
-CMD  [ "wait-for-it", "localhost:11311", "--", "ros2", "v2x-ros-conversion", "v2x-ros-conversion.launch" ]
-
+CMD  [ "wait-for-it", "localhost:11311", "--", "ros2", "v2x-ros-conversion", "v2x-ros-conversion.launch.py" ]
