@@ -75,24 +75,11 @@ jobs:
       run: |
         find "/opt/carma/" -name "coverage.xml"
         find "/opt/carma/" -name "compile_commands.json"
+
     - name: Merge compile_commands.json
       run: |
-        echo "[" > /opt/carma/build/combined_compile_commands.json
-        first=true
-        for f in $(find /opt/carma/build -name "compile_commands.json"); do
-          if [ "$first" = true ]; then
-            first=false
-          else
-            echo "," >> /opt/carma/build/combined_compile_commands.json
-          fi
-          jq -c '.[]' $f >> /opt/carma/build/combined_compile_commands.json
-        done
-        echo "]" >> /opt/carma/build/combined_compile_commands.json
-
-        # Debug combined file
-        ls -l /opt/carma/build/combined_compile_commands.json
-        jq '.' /opt/carma/build/combined_compile_commands.json
-
+        jq -s 'add' $(find /opt/carma/build -name "compile_commands.json") > /opt/carma/build/combined_compile_commands.json
+        cat /opt/carma/build/combined_compile_commands.json
     - name: Run SonarScanner
       uses: usdot-fhwa-stol/actions/sonar-scanner@main
       with:
