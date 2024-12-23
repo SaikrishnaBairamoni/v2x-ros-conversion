@@ -73,8 +73,8 @@ jobs:
     - name: Find coverage.xml
       shell: bash
       run: |
-        find "$GITHUB_WORKSPACE" -name "coverage.xml"
-        find "$GITHUB_WORKSPACE" -name "compile_commands.json"
+        find "/opt/carma/" -name "coverage.xml"
+        find "/opt/carma/" -name "compile_commands.json"
 
     - name: Run SonarScanner
       uses: usdot-fhwa-stol/actions/sonar-scanner@main
