@@ -11,17 +11,19 @@
 #  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #  License for the specific language governing permissions and limitations under
 #  the License.
+
 ARG DOCKER_ORG="usdotfhwastoldev"
 ARG DOCKER_TAG="develop-humble"
 FROM ${DOCKER_ORG}/carma-base:${DOCKER_TAG} as base_image
+
 FROM base_image as setup
-ARG GIT_BRANCH="develop-humble" 
+SHELL ["/bin/bash", "-c"]
+ARG GIT_BRANCH="develop-humble"
 
 RUN mkdir ~/src
 COPY --chown=carma . /home/carma/src/
-RUN ~/src/docker/checkout.bash -b ${GIT_BRANCH}
-
-RUN ~/src/docker/install.sh
+RUN source /opt/ros/humble/setup.bash && ~/src/docker/checkout.bash -b ${GIT_BRANCH}
+RUN source /opt/ros/humble/setup.bash && ~/src/docker/install.sh
 
 FROM base_image
 
