@@ -62,6 +62,12 @@ jobs:
         source "$INIT_ENV"
         source "$ROS_2_ENV"
         ./src/${{ github.event.repository.name }}/docker/checkout.bash -r /opt/carma/ -b ${{ steps.determine-base-branch.outputs.git_branch }}
+    - name: Find setup.bash
+      shell: bash
+      run: |
+        find "$GITHUB_WORKSPACE" -name "setup.bash"
+        find "/opt/carma/" -name "setup.bash"
+
     - name: Build
       run: |
         source "$INIT_ENV"
@@ -69,6 +75,7 @@ jobs:
         PACKAGES=$(find . -maxdepth 2 -type f -name package.xml | sed 's/\.\///' | cut -d/ -f1)
         sed -i '/colcon build/ s/$/ --parallel-workers 4 --packages-up-to $PACKAGES/' /home/carma/.ci-image/engineering_tools/code_coverage/make_with_coverage.bash
         make_with_coverage.bash -m -e /opt/carma/ -o ./coverage_reports/gcov
+  
     - name: Run C++ Tests
       continue-on-error: true
       run: |
