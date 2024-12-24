@@ -18,4 +18,4 @@
 cd ~/
 #source /home/carma/catkin/setup.bash
 source /opt/ros/humble/setup.bash
-colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --install-base /opt/carma/install
+colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --build-base ~/build --install-base /opt/carma/install
