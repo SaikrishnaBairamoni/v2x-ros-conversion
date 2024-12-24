@@ -28,7 +28,6 @@ jobs:
     container:
       image: usdotfhwastoldev/carma-base:develop-humble
       env:
-        INIT_ENV: "/home/carma/.base-image/init-env.sh"
         ROS_2_ENV: "/opt/ros/humble/setup.bash"
         TERM: xterm
       options: "--user root"
@@ -42,24 +41,7 @@ jobs:
     
     - name: Move Source Code
       run: mv $GITHUB_WORKSPACE/src /opt/carma/
-
-    - name: Verify ROS Humble Setup File
-      run: |
-        if [ ! -f /opt/ros/humble/setup.bash ]; then
-          echo "ERROR: ROS Humble setup.bash not found!"
-          exit 1
-        fi
-
-    - name: Debug Setup Path
-      run: |
-        echo "Checking ROS Humble setup.bash path:"
-        ls -l /opt/ros/humble/setup.bash || echo "setup.bash NOT FOUND!"
     
-    - name: Install ROS Dependencies
-      run: |
-        apt-get update
-        apt-get install -y ros-humble-ros-environment
-
     - name: Determine Base Branch
       id: determine-base-branch
       run: |
@@ -74,7 +56,6 @@ jobs:
         source "$INIT_ENV"
         source "$ROS_2_ENV"
         ./src/${{ github.event.repository.name }}/docker/checkout.bash -r /opt/carma/ -b ${{ steps.determine-base-branch.outputs.git_branch }}
-
     - name: Build
       run: |
         source "$INIT_ENV"
