@@ -39,10 +39,6 @@ jobs:
         path: src/${{ github.event.repository.name }}
     - name: Move source code
       run: mv $GITHUB_WORKSPACE/src /opt/carma/
-    - name: Debug Base Image
-      run: |
-        docker pull usdotfhwastoldev/carma-base:develop-humble
-        docker run --rm usdotfhwastoldev/carma-base:develop-humble ls /opt/ros/humble/setup.bash
     - name: Verify ROS Humble Setup File
       run: |
         if [ ! -f /opt/ros/humble/setup.bash ]; then
