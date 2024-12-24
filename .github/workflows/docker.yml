@@ -7,7 +7,5 @@ jobs:
     uses: usdot-fhwa-stol/actions/.github/workflows/docker.yml@main
     with:
       runner: ubuntu-latest
-      context: .
-      file: Dockerfile
-      build_args: |
-        DOCKER_TAG=develop-humble
+      docker_tag: develop-humble
+
