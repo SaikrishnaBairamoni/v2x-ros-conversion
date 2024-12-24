@@ -17,6 +17,7 @@ jobs:
     steps:
       - id: docker-org-and-tag
         uses: usdot-fhwa-stol/actions/docker-org-and-tag@main
+
   build:
     needs: determine_docker_org_and_tag
     defaults:
@@ -31,21 +32,35 @@ jobs:
         ROS_2_ENV: "/opt/ros/humble/setup.bash"
         TERM: xterm
       options: "--user root"
+
     steps:
-    - name: Checkout ${{ github.event.repository.name }}
+    - name: Checkout Repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
         path: src/${{ github.event.repository.name }}
-    - name: Move source code
+    
+    - name: Move Source Code
       run: mv $GITHUB_WORKSPACE/src /opt/carma/
+
     - name: Verify ROS Humble Setup File
       run: |
         if [ ! -f /opt/ros/humble/setup.bash ]; then
           echo "ERROR: ROS Humble setup.bash not found!"
           exit 1
         fi
-    - name: Determine base branch
+
+    - name: Debug Setup Path
+      run: |
+        echo "Checking ROS Humble setup.bash path:"
+        ls -l /opt/ros/humble/setup.bash || echo "setup.bash NOT FOUND!"
+    
+    - name: Install ROS Dependencies
+      run: |
+        apt-get update
+        apt-get install -y ros-humble-ros-environment
+
+    - name: Determine Base Branch
       id: determine-base-branch
       run: |
         if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
@@ -53,16 +68,12 @@ jobs:
         else
           echo git_branch="$GITHUB_REF_NAME" >> $GITHUB_OUTPUT
         fi
-    - name: Checkout dependencies
+
+    - name: Checkout Dependencies
       run: |
         source "$INIT_ENV"
         source "$ROS_2_ENV"
         ./src/${{ github.event.repository.name }}/docker/checkout.bash -r /opt/carma/ -b ${{ steps.determine-base-branch.outputs.git_branch }}
-    - name: Find setup.bash
-      shell: bash
-      run: |
-        find "$GITHUB_WORKSPACE" -name "setup.bash"
-        find "/opt/carma/" -name "setup.bash"
 
     - name: Build
       run: |
@@ -71,7 +82,7 @@ jobs:
         PACKAGES=$(find . -maxdepth 2 -type f -name package.xml | sed 's/\.\///' | cut -d/ -f1)
         sed -i '/colcon build/ s/$/ --parallel-workers 4 --packages-up-to $PACKAGES/' /home/carma/.ci-image/engineering_tools/code_coverage/make_with_coverage.bash
         make_with_coverage.bash -m -e /opt/carma/ -o ./coverage_reports/gcov
-  
+
     - name: Run C++ Tests
       continue-on-error: true
       run: |
@@ -79,10 +90,12 @@ jobs:
         source "$ROS_2_ENV"
         sed -i '/colcon test/ s/$/ --parallel-workers 4 --packages-above $PACKAGES/' /home/carma/.ci-image/engineering_tools/code_coverage/make_with_coverage.bash
         make_with_coverage.bash -t -e /opt/carma/ -o ./coverage_reports/gcov
+
     - name: Merge compile_commands.json
       run: |
         jq -s 'add' $(find /opt/carma/build -name "compile_commands.json") > /opt/carma/build/combined_compile_commands.json
         cat /opt/carma/build/combined_compile_commands.json
+
     - name: Run SonarScanner
       uses: usdot-fhwa-stol/actions/sonar-scanner@main
       with:
